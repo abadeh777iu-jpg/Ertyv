@@ -1,14 +1,1105 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>محاسبه‌گر مالی</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚚</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1117">
+  <meta name="description" content="المنتا؛ اطلس تعاملی و فارسیِ جدول تناوبی همهٔ ۱۱۸ عنصر، با مدل اتمی، آرایش الکترونی و جست‌وجوی هوشمند.">
+  <title>المنتا | اطلس تعاملی عناصر</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d1117;
+      --ink: #edf2f7;
+      --muted: #8b9aaa;
+      --faint: #647487;
+      --line: rgba(174, 194, 216, .105);
+      --accent-rgb: 255, 212, 59;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { min-width: 320px; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; }
+    ::selection { background: rgba(var(--accent-rgb), .3); color: #fff; }
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0);
+      white-space: nowrap; border: 0;
+    }
+    .backdrop { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .backdrop-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(147, 172, 197, .034) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(147, 172, 197, .034) 1px, transparent 1px);
+      background-size: 58px 58px;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 37%, transparent 86%);
+      mask-image: linear-gradient(to bottom, #000 0, #000 37%, transparent 86%);
+    }
+    .backdrop-glow {
+      position: absolute; width: 670px; height: 590px;
+      top: -320px; right: 12%; border-radius: 50%;
+      background-color: rgb(var(--accent-rgb)); opacity: .115;
+      filter: blur(128px);
+      transition: background-color .55s ease;
+    }
+    .backdrop-glow--blue {
+      width: 540px; height: 450px; top: 300px; right: -370px;
+      background: #3286c3; opacity: .055; filter: blur(125px);
+    }
+    .app { position: relative; z-index: 1; max-width: 1550px; margin: 0 auto; padding: 0 clamp(19px, 3.7vw, 64px) 22px; }
+
+    /* Masthead */
+    .topbar {
+      height: 80px; display: flex; align-items: center; justify-content: space-between;
+      gap: 20px; border-bottom: 1px solid var(--line);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand-mark {
+      width: 42px; height: 42px; flex: none; display: grid; place-items: center;
+      border: 1px solid rgba(var(--accent-rgb), .34); border-radius: 12px;
+      background: radial-gradient(circle at 44% 36%, rgba(var(--accent-rgb), .15), rgba(var(--accent-rgb), .025) 70%);
+      box-shadow: inset 0 1px rgba(255,255,255,.075), 0 0 22px rgba(var(--accent-rgb), .065);
+      color: rgb(var(--accent-rgb)); transition: border-color .4s, background .4s, color .4s;
+    }
+    .brand-mark svg { width: 28px; height: 28px; overflow: visible; }
+    .brand-copy { display: flex; flex-direction: column; line-height: 1.25; }
+    .brand-name {
+      direction: ltr; text-align: right; font: 700 17px/1.2 "Avenir Next", "Segoe UI", Arial, sans-serif;
+      letter-spacing: .22em; color: #f3f5fa;
+    }
+    .brand-sub { margin-top: 5px; font-size: 10px; letter-spacing: .01em; color: var(--muted); }
+    .topbar-meta { display: flex; align-items: center; gap: 15px; color: #9cabb8; font-size: 11px; white-space: nowrap; }
+    .topbar-meta .separator { width: 1px; height: 17px; background: var(--line); }
+    .online-dot { width: 6px; height: 6px; display: inline-block; border-radius: 50%; background: #65d6ad; box-shadow: 0 0 10px rgba(101,214,173,.6); margin-left: 7px; }
+    .topbar-code { direction: rtl; font-size: 11px; letter-spacing: .02em; color: #b6c2d0; }
+
+    /* Introduction & search */
+    .hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 36px; padding: 34px 0 29px; }
+    .hero-copy { min-width: 0; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 10px; color: rgb(var(--accent-rgb)); font-size: 10px; font-weight: 650; letter-spacing: .08em; }
+    .eyebrow::before { content: ""; display: block; width: 24px; height: 1px; background: currentColor; opacity: .65; }
+    h1 { margin: 9px 0 5px; font-size: clamp(31px, 3vw, 46px); line-height: 1.37; letter-spacing: -.055em; font-weight: 750; }
+    h1 span { color: rgb(var(--accent-rgb)); text-shadow: 0 0 35px rgba(var(--accent-rgb), .22); transition: color .4s; }
+    .hero-copy p { color: #9aa8b8; margin: 0; font-size: 12px; line-height: 2; }
+    .search-area { position: relative; z-index: 30; width: min(365px, 34%); flex: none; margin-bottom: 3px; }
+    .search-caption { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 2px 8px; color: #a9b6c5; font-size: 11px; }
+    .search-caption small { color: var(--faint); font-size: 10px; }
+    .search-box {
+      height: 48px; display: flex; align-items: center; gap: 11px;
+      padding: 0 14px; border-radius: 11px; border: 1px solid rgba(173,192,214,.19);
+      background: rgba(23, 31, 41, .84); box-shadow: inset 0 1px rgba(255,255,255,.045), 0 8px 26px rgba(0,0,0,.085);
+      transition: border-color .22s, box-shadow .22s, background .22s;
+    }
+    .search-box:focus-within { border-color: rgba(var(--accent-rgb), .6); background: #19212b; box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .09), 0 12px 28px rgba(0,0,0,.17); }
+    .search-box svg { flex: none; width: 18px; height: 18px; fill: none; stroke: #8799ac; stroke-width: 1.8; }
+    .search-box:focus-within svg { stroke: rgb(var(--accent-rgb)); }
+    .search-box input { min-width: 0; width: 100%; padding: 0; border: 0; outline: 0; background: transparent; color: #f2f5f8; direction: rtl; text-align: right; font-size: 12px; }
+    .search-box input::placeholder { color: #748496; opacity: 1; }
+    .search-box input::-webkit-search-cancel-button { -webkit-appearance: none; }
+    .search-box kbd { flex: none; min-width: 21px; height: 22px; display: grid; place-items: center; border: 1px solid #394656; border-radius: 5px; color: #93a3b4; font: 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; direction: ltr; }
+    .search-results {
+      position: absolute; top: calc(100% + 8px); right: 0; left: 0; z-index: 50;
+      margin: 0; padding: 6px; list-style: none; max-height: 354px; overflow-y: auto;
+      border: 1px solid #354252; border-radius: 12px; background: #19222d;
+      box-shadow: 0 20px 55px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.045);
+    }
+    .search-results[hidden] { display: none; }
+    .search-option { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 6px 8px; border-radius: 7px; color: #dce5ee; cursor: pointer; transition: background .15s; }
+    .search-option:hover, .search-option[aria-selected="true"] { background: rgba(var(--result-rgb), .12); }
+    .search-option__symbol { width: 29px; height: 29px; flex: none; display: grid; place-items: center; border: 1px solid rgba(var(--result-rgb), .35); border-radius: 6px; background: rgba(var(--result-rgb), .09); color: rgb(var(--result-rgb)); font: 700 15px/1 "Segoe UI", Arial, sans-serif; direction: ltr; }
+    .search-option__name { flex: 1; font-size: 12px; }
+    .search-option__name small { display: block; font-size: 9px; color: #8090a1; }
+    .search-option__number { color: #92a1af; font: 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .search-empty { padding: 12px; text-align: center; color: #a9b7c4; font-size: 11px; }
+
+    /* Colour key */
+    .legend { display: flex; gap: 18px; padding: 15px 0 17px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .legend-title { flex: none; min-width: 112px; padding-top: 3px; }
+    .legend-title strong { display: block; color: #e2e8ee; font-size: 11px; font-weight: 650; }
+    .legend-title span { display: block; margin-top: 2px; color: var(--faint); font-size: 10px; }
+    .legend-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; min-width: 0; }
+    .legend-chip {
+      --rgb: 169, 185, 203;
+      flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      min-height: 31px; padding: 5px 10px; border: 1px solid rgba(var(--rgb), .18); border-radius: 7px;
+      background: rgba(var(--rgb), .035); color: #a5b2c1; white-space: nowrap; font-size: 10px;
+      transition: color .2s, background .2s, border-color .2s, box-shadow .2s, transform .2s;
+    }
+    .legend-chip:hover { color: #f2f5f8; background: rgba(var(--rgb), .11); border-color: rgba(var(--rgb), .4); transform: translateY(-2px); }
+    .legend-chip.is-active { color: #f4f7fa; background: rgba(var(--rgb), .12); border-color: rgba(var(--rgb), .48); box-shadow: inset 0 1px rgba(255,255,255,.045), 0 0 15px rgba(var(--rgb), .075); }
+    .legend-chip__dot { width: 6px; height: 6px; flex: none; border-radius: 50%; background: rgb(var(--rgb)); box-shadow: 0 0 9px rgba(var(--rgb), .48); }
+    .legend-chip--all .legend-chip__dot { background: conic-gradient(#ff6b6b, #ffd43b, #38d9a9, #4dabf7, #da77f2, #ff6b6b); box-shadow: none; width: 9px; height: 9px; }
+    .legend-chip:focus-visible, .placeholder:focus-visible { outline: 2px solid rgb(var(--accent-rgb)); outline-offset: 3px; }
+
+    /* The table and its labels */
+    .explorer { margin-top: 23px; }
+    .explorer-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 13px; }
+    .explorer-kicker { color: var(--faint); font-size: 10px; line-height: 1.6; direction: rtl; text-align: right; letter-spacing: .025em; }
+    .explorer-heading h2 { margin: 1px 0 0; color: #e9eff5; font-size: 18px; font-weight: 650; letter-spacing: -.03em; }
+    .explorer-count { display: inline-flex; align-items: center; gap: 9px; color: #9eacba; font-size: 11px; white-space: nowrap; }
+    .explorer-count::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: rgb(var(--accent-rgb)); box-shadow: 0 0 9px rgba(var(--accent-rgb), .75); }
+    .table-frame {
+      position: relative; isolation: isolate; overflow: hidden;
+      padding: 16px 15px 13px; border: 1px solid rgba(171,194,215,.13); border-radius: 17px;
+      background: linear-gradient(155deg, rgba(25,34,44,.79), rgba(17,24,33,.93) 42%, rgba(16,23,32,.88));
+      box-shadow: inset 0 1px rgba(255,255,255,.055), 0 22px 80px rgba(0,0,0,.14);
+    }
+    .table-frame::before {
+      content: ""; position: absolute; z-index: -1; top: -240px; right: 28%; width: 460px; height: 460px;
+      background: radial-gradient(circle, rgba(var(--accent-rgb), .055), transparent 70%); pointer-events: none;
+    }
+    .table-scroll { position: relative; width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; direction: ltr; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: #39495a transparent; padding-bottom: 4px; }
+    .table-scroll::-webkit-scrollbar { height: 6px; }
+    .table-scroll::-webkit-scrollbar-thumb { background: #3a495b; border-radius: 20px; }
+    .table-scroll::-webkit-scrollbar-track { background: transparent; }
+    .table-scroll:focus-visible { outline: 2px solid rgba(var(--accent-rgb), .7); outline-offset: -2px; border-radius: 8px; }
+    .periodic-grid {
+      position: relative; display: grid; width: 100%; min-width: 1150px;
+      grid-template-columns: 28px repeat(18, minmax(0, 1fr));
+      grid-template-rows: 20px repeat(7, auto) 22px repeat(2, auto);
+      gap: 5px; direction: ltr; align-items: stretch;
+    }
+    .axis-label { display: flex; align-items: center; justify-content: center; min-width: 0; color: #657487; font: 10px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 5px; transition: color .25s, background .25s, text-shadow .25s; }
+    .axis-label--corner { font-size: 8px; color: #718196; direction: rtl; }
+    .axis-label--period { font-size: 10px; }
+    .axis-label--series { color: #9d8ca4; font-size: 9px; }
+    .axis-label.is-lit { color: rgb(var(--accent-rgb)); background: rgba(var(--accent-rgb), .1); text-shadow: 0 0 12px rgba(var(--accent-rgb), .6); }
+    .f-divider { display: flex; align-items: center; gap: 13px; color: #8090a0; direction: rtl; font-size: 9px; letter-spacing: .05em; }
+    .f-divider::after { content: ""; height: 1px; flex: 1; background: linear-gradient(to left, rgba(171,194,215,.19), transparent); }
+    .f-divider b { color: #bd93bd; font: 10px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+    .element-tile {
+      --rgb: 255, 212, 59;
+      position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
+      min-width: 0; width: 100%; height: auto; aspect-ratio: 1 / 1; overflow: hidden;
+      padding: 5px 6px 4px; border: 1px solid rgba(var(--rgb), .28); border-radius: 8px;
+      background: linear-gradient(150deg, rgba(var(--rgb), .155), rgba(var(--rgb), .065) 62%, rgba(var(--rgb), .035));
+      box-shadow: inset 0 1px rgba(255,255,255,.055), inset 0 0 16px rgba(var(--rgb), .018);
+      color: #e6edf3; direction: rtl; text-align: right; -webkit-tap-highlight-color: transparent;
+      transition: border-color .22s, background .22s, box-shadow .22s, opacity .22s, filter .22s, transform .22s;
+      animation: tile-arrive .58s cubic-bezier(.2,.8,.2,1) both;
+      animation-delay: var(--enter-delay, 0ms);
+    }
+    .element-tile::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(circle at 78% 4%, rgba(var(--rgb), .17), transparent 64%); opacity: .7; transition: opacity .2s; }
+    .element-tile::after { content: ""; position: absolute; top: 0; right: 7px; left: 7px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); opacity: .48; }
+    .element-tile:hover, .element-tile.is-preview {
+      z-index: 8; border-color: rgba(var(--rgb), .86);
+      background: linear-gradient(145deg, rgba(var(--rgb), .27), rgba(var(--rgb), .105));
+      box-shadow: inset 0 1px rgba(255,255,255,.15), 0 7px 22px rgba(0,0,0,.28), 0 0 20px rgba(var(--rgb), .22);
+      transform: translateY(-3px) scale(1.045);
+    }
+    .element-tile:hover::before, .element-tile.is-preview::before { opacity: 1; }
+    .element-tile.is-pinned { border-color: rgba(var(--rgb), .76); box-shadow: inset 0 1px rgba(255,255,255,.1), 0 0 14px rgba(var(--rgb), .19); }
+    .element-tile.is-pinned::after { top: auto; right: auto; bottom: 7px; left: 7px; width: 4px; height: 4px; border-radius: 50%; background: rgb(var(--rgb)); opacity: 1; box-shadow: 0 0 8px rgb(var(--rgb)); }
+    .element-tile.is-dimmed { opacity: .16; filter: saturate(.15); }
+    .element-tile.is-dimmed:hover, .element-tile.is-dimmed:focus-visible { opacity: .92; filter: none; }
+    .element-tile.is-matched:not(.is-preview) { border-color: rgba(var(--rgb), .69); box-shadow: inset 0 1px rgba(255,255,255,.095), 0 0 11px rgba(var(--rgb), .14); }
+    .element-tile:focus-visible { outline: 2px solid rgb(var(--rgb)); outline-offset: 2px; z-index: 12; opacity: 1; filter: none; }
+    .tile-number { color: rgba(232,241,249,.66); font: 9px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; direction: ltr; }
+    .tile-symbol { color: rgb(var(--rgb)); font: 700 clamp(21px, 1.95vw, 29px)/.97 "Avenir Next", "Segoe UI", Arial, sans-serif; letter-spacing: -.055em; direction: ltr; text-shadow: 0 0 18px rgba(var(--rgb), .42); }
+    .tile-name { display: block; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #c6d1dc; font-size: clamp(8px, .72vw, 10px); line-height: 1.1; letter-spacing: -.035em; }
+    .tile-mass { position: absolute; top: 6px; left: 6px; color: rgb(var(--rgb)); font: 8px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; opacity: 0; transform: translateY(3px); transition: opacity .2s, transform .2s; direction: ltr; }
+    .element-tile:hover .tile-mass, .element-tile:focus-visible .tile-mass { opacity: .9; transform: translateY(0); }
+    .element-tile.is-flashing { z-index: 13; animation: search-flash 1.35s ease-out both; }
+
+    .placeholder {
+      --rgb: 247, 131, 172;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+      min-width: 0; aspect-ratio: 1; padding: 3px; border: 1px dashed rgba(var(--rgb), .37); border-radius: 8px;
+      color: rgb(var(--rgb)); background: rgba(var(--rgb), .04); direction: rtl;
+      transition: background .2s, border-color .2s, transform .2s, opacity .2s, box-shadow .2s;
+    }
+    .placeholder:hover, .placeholder.is-matched { border-color: rgba(var(--rgb), .75); background: rgba(var(--rgb), .12); box-shadow: 0 0 13px rgba(var(--rgb), .1); }
+    .placeholder:hover { transform: translateY(-2px); }
+    .placeholder.is-dimmed { opacity: .26; }
+    .placeholder strong { font: 600 10px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; direction: ltr; }
+    .placeholder small { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; font-size: 8px; }
+
+    /* The identity card lives in the natural gap above the d-block. */
+    .detail-panel {
+      position: relative; isolation: isolate; overflow: hidden; contain: strict;
+      grid-column: 4 / span 10; grid-row: 3 / span 2;
+      display: grid; grid-template-columns: clamp(106px, 10.6vw, 145px) minmax(0, 1fr);
+      gap: 10px; padding: 8px 11px; direction: ltr;
+      border: 1px solid rgba(var(--accent-rgb), .28); border-radius: 11px;
+      background: linear-gradient(112deg, rgba(15,23,33,.96), rgba(22,31,41,.97));
+      box-shadow: inset 0 1px rgba(255,255,255,.12), 0 0 26px rgba(var(--accent-rgb), .08), 0 12px 27px rgba(0,0,0,.17);
+      transition: border-color .35s, box-shadow .35s;
+    }
+    .detail-panel::before {
+      content: ""; position: absolute; z-index: -1; inset: -50% -17% -35% 31%; pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(var(--accent-rgb), .165), transparent 65%);
+    }
+    .detail-panel::after {
+      content: ""; position: absolute; top: 0; left: 18%; right: 18%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), .65), transparent);
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), .3);
+    }
+    .diagram-side { min-width: 0; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .bohr-svg { width: 100%; height: calc(100% - 11px); min-height: 0; overflow: visible; color: rgb(var(--accent-rgb)); filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), .14)); }
+    .diagram-caption { white-space: nowrap; color: #7c8b9a; direction: rtl; font-size: 8px; line-height: 1; }
+    .ghost-orbit { fill: none; stroke: #77869a; stroke-width: .55; stroke-dasharray: 1.4 5.5; opacity: .26; }
+    .orbit-line { fill: none; stroke: currentColor; stroke-width: .8; opacity: .37; }
+    .electron-halo { fill: currentColor; opacity: .19; }
+    .electron-dot { fill: #f7faff; stroke: currentColor; stroke-width: .6; }
+    .nucleus-halo { fill: currentColor; opacity: .09; }
+    .nucleon { fill: currentColor; opacity: .82; }
+    .nucleon:nth-child(3n) { fill: #fff6d9; opacity: .92; }
+    .orbit-shell { transform-origin: 100px 100px; transform-box: view-box; animation: shell-enter .52s cubic-bezier(.16,1.45,.34,1) both; animation-delay: var(--shell-delay); }
+    .detail-content { min-width: 0; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; direction: rtl; }
+    .detail-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+    .identity { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .identity-symbol {
+      flex: none; width: 40px; height: 40px; display: grid; place-items: center;
+      border: 1px solid rgba(var(--accent-rgb), .38); border-radius: 8px;
+      background: rgba(var(--accent-rgb), .115); color: rgb(var(--accent-rgb));
+      font: 700 23px/1 "Avenir Next", "Segoe UI", Arial, sans-serif; direction: ltr;
+      text-shadow: 0 0 15px rgba(var(--accent-rgb), .35);
+    }
+    .identity-text { min-width: 0; }
+    .identity-top { display: flex; align-items: center; gap: 7px; white-space: nowrap; color: #8b9baa; font-size: 9px; line-height: 1.1; }
+    .identity-top .tiny-divider { width: 2px; height: 2px; border-radius: 50%; background: #748597; }
+    .identity-top .category-name { color: rgb(var(--accent-rgb)); }
+    .identity-text h3 { margin: 2px 0 0; font-size: 20px; line-height: 1.12; font-weight: 700; letter-spacing: -.035em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-status { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; align-self: flex-start; color: #93a2b1; font-size: 9px; }
+    .card-status i { display: block; width: 5px; height: 5px; border-radius: 50%; background: rgb(var(--accent-rgb)); box-shadow: 0 0 9px rgba(var(--accent-rgb), .8); }
+    .detail-facts { display: grid; grid-template-columns: 1.04fr 1.08fr 1fr .57fr; gap: 5px; margin-top: 3px; padding-top: 5px; border-top: 1px solid rgba(190,207,225,.105); min-width: 0; }
+    .fact { min-width: 0; }
+    .fact + .fact { border-right: 1px solid rgba(190,207,225,.085); padding-right: 8px; }
+    .fact-label { display: block; color: #8191a2; font-size: 9px; line-height: 1.3; white-space: nowrap; }
+    .fact-value { display: flex; align-items: center; gap: 5px; margin-top: 3px; color: #eaf0f6; font-size: 12px; font-weight: 650; line-height: 1.2; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .fact-value--mass { direction: ltr; justify-content: flex-end; font: 600 13px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: right; }
+    .fact-value--mass small { font-size: 9px; font-weight: 400; color: #8293a5; }
+    .state-icon { width: 13px; height: 13px; flex: none; color: rgb(var(--accent-rgb)); }
+    .state-icon svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+    .fact-value--latin { direction: ltr; justify-content: flex-end; font: 650 14px/1.1 "Segoe UI", Arial, sans-serif; }
+    .detail-bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.16fr); gap: 10px; align-items: end; margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(190,207,225,.105); min-width: 0; }
+    .config { min-width: 0; }
+    .micro-label { display: block; margin-bottom: 2px; color: #8494a5; font-size: 8px; line-height: 1.1; }
+    .config-value { display: block; overflow: hidden; white-space: nowrap; text-overflow: clip; direction: ltr; text-align: right; color: #dce8f3; font: 10px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: -.035em; }
+    .config-value sup { font-size: .73em; line-height: 0; vertical-align: super; }
+    .shells { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; direction: ltr; }
+    .shell { min-width: 0; }
+    .shell-top { display: flex; justify-content: space-between; gap: 1px; color: #7e8e9f; font: 9px/1.15 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .shell-top strong { color: #d9e4ef; font-weight: 600; }
+    .shell-track { display: block; overflow: hidden; width: 100%; height: 2px; margin-top: 5px; border-radius: 9px; background: #344250; }
+    .shell-fill { display: block; width: var(--fill); height: 100%; border-radius: inherit; background: rgb(var(--accent-rgb)); box-shadow: 0 0 6px rgba(var(--accent-rgb), .7); transform-origin: left center; animation: bar-grow .65s ease-out both; animation-delay: var(--bar-delay); }
+
+    .scroll-fade { position: absolute; z-index: 10; top: 14px; bottom: 14px; width: 26px; opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .scroll-fade--left { left: 15px; background: linear-gradient(90deg, #151d27, transparent); }
+    .scroll-fade--right { right: 15px; background: linear-gradient(270deg, #151d27, transparent); }
+    .table-frame.can-scroll-left .scroll-fade--left, .table-frame.can-scroll-right .scroll-fade--right { opacity: 1; }
+    .scroll-meter { display: none; direction: ltr; height: 2px; margin-top: 10px; overflow: hidden; background: #33404e; border-radius: 3px; }
+    .scroll-meter span { display: block; width: 25%; height: 100%; border-radius: inherit; background: rgb(var(--accent-rgb)); box-shadow: 0 0 9px rgba(var(--accent-rgb), .5); transform: translateX(0); transition: background .3s; }
+    .table-help { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 11px; color: #8392a3; font-size: 10px; }
+    .table-help .key { display: inline-block; padding: 1px 5px; border: 1px solid #3c4b5b; border-radius: 4px; color: #afbcc9; font: 10px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; direction: ltr; vertical-align: middle; }
+    .table-help--touch { display: none; }
+    .footnote { display: flex; align-items: flex-start; gap: 9px; margin: 18px 1px 0; color: #7d8d9e; font-size: 10px; line-height: 1.85; }
+    .footnote-icon { flex: none; width: 15px; height: 15px; display: grid; place-items: center; border: 1px solid #596b7d; border-radius: 50%; color: #9cabbc; font: 600 10px/1 Georgia, serif; direction: ltr; margin-top: 2px; }
+    .footer { display: flex; justify-content: space-between; gap: 16px; margin-top: 32px; padding-top: 17px; border-top: 1px solid var(--line); color: #667688; font-size: 10px; }
+    .footer strong { color: #9aaabc; font-weight: 600; }
+
+    @keyframes tile-arrive { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes shell-enter { from { opacity: 0; transform: scale(.62); } to { opacity: 1; transform: scale(1); } }
+    @keyframes bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes search-flash { 0%, 100% { outline: 2px solid transparent; outline-offset: 2px; } 18%, 53% { outline: 2px solid rgb(var(--rgb)); outline-offset: 5px; box-shadow: 0 0 0 7px rgba(var(--rgb), .15), 0 0 30px rgba(var(--rgb), .6); } }
+    .is-hidden .orbit-shell, .is-hidden .element-tile, .is-hidden .shell-fill { animation-play-state: paused; }
+
+    /* Keep the in-table card crisp even at the smallest desktop table size. */
+    @media (min-width: 1200px) and (max-width: 1379px) {
+      .detail-panel { padding-top: 5px; padding-bottom: 5px; }
+      .diagram-caption, .card-status { display: none; }
+      .bohr-svg { height: 100%; }
+      .identity-symbol { width: 34px; height: 34px; font-size: 20px; }
+      .identity-text h3 { font-size: 17px; }
+      .detail-facts { padding-top: 3px; margin-top: 2px; }
+      .fact-label { font-size: 8px; }
+      .fact-value { font-size: 11px; margin-top: 2px; }
+      .fact-value--mass { font-size: 11px; }
+      .detail-bottom { margin-top: 2px; padding-top: 3px; }
+      .micro-label { font-size: 8px; margin-bottom: 1px; }
+      .config-value { font-size: 9px; }
+      .shell-track { margin-top: 3px; }
+    }
+    /* The card moves above the independently scrolling table on smaller screens. */
+    .mobile-panel-slot { display: none; }
+    @media (max-width: 1199px) {
+      .mobile-panel-slot { display: block; margin-bottom: 16px; }
+      .detail-panel { contain: none; min-height: 202px; grid-column: auto; grid-row: auto; grid-template-columns: 170px minmax(0,1fr); gap: 19px; padding: 16px 19px; border-radius: 14px; }
+      .diagram-side { max-height: 169px; }
+      .detail-facts { margin-top: 9px; padding-top: 10px; }
+      .detail-bottom { margin-top: 9px; padding-top: 9px; }
+      .identity-symbol { width: 47px; height: 47px; font-size: 27px; }
+      .identity-text h3 { font-size: 24px; }
+      .fact-label { font-size: 10px; }
+      .fact-value { font-size: 13px; }
+      .config-value { font-size: 11px; }
+    }
+    @media (max-width: 820px) {
+      .app { padding-right: 22px; padding-left: 22px; }
+      .topbar { height: 72px; }
+      .hero { gap: 24px; padding: 29px 0 25px; }
+      h1 { font-size: 34px; }
+      .hero-copy p { max-width: 440px; }
+      .search-area { width: min(330px, 44%); }
+      .legend { display: block; }
+      .legend-title { display: flex; align-items: center; gap: 9px; padding: 0 0 10px; }
+      .legend-title span { margin: 0; }
+      .legend-chips { flex-wrap: nowrap; overflow-x: auto; padding: 0 1px 5px; scrollbar-width: none; overscroll-behavior-x: contain; }
+      .legend-chips::-webkit-scrollbar { display: none; }
+      .table-frame { padding: 13px 11px 10px; }
+      .scroll-fade--left { left: 11px; } .scroll-fade--right { right: 11px; }
+      .scroll-meter { display: block; }
+      .table-help--desktop { display: none; } .table-help--touch { display: inline; }
+      .detail-panel { grid-template-columns: 145px minmax(0,1fr); gap: 13px; }
+      .diagram-side { max-height: 155px; }
+    }
+    @media (max-width: 650px) {
+      .topbar { height: 64px; }
+      .topbar-meta .separator, .topbar-code { display: none; }
+      .topbar-meta { font-size: 10px; }
+      .hero { display: block; padding: 22px 0 16px; }
+      h1 { font-size: clamp(29px, 8.3vw, 39px); }
+      .hero-copy p { font-size: 11px; }
+      .search-area { width: 100%; margin: 15px 0 0; }
+      .search-box { height: 45px; }
+      .search-caption { padding-bottom: 7px; }
+      .legend { padding: 9px 0 8px; }
+      .legend-title { padding-bottom: 6px; }
+      .explorer { margin-top: 16px; }
+      .explorer-heading { margin-bottom: 10px; }
+      .explorer-heading h2 { font-size: 16px; }
+      .explorer-count { font-size: 10px; }
+      .table-frame { padding-top: 11px; }
+      .mobile-panel-slot { margin-bottom: 12px; }
+      .detail-panel {
+        grid-template-columns: minmax(0, 1fr) 105px; grid-template-rows: 106px auto auto;
+        direction: rtl; gap: 6px 9px; padding: 13px; min-height: 0;
+      }
+      .diagram-side { grid-column: 2; grid-row: 1; align-self: center; height: 105px; max-height: none; }
+      .bohr-svg { height: 100%; }
+      .diagram-caption { display: none; }
+      .detail-content { display: contents; }
+      .detail-head { grid-column: 1; grid-row: 1; align-self: center; }
+      .identity { align-items: flex-start; gap: 8px; }
+      .identity-symbol { width: 39px; height: 39px; font-size: 23px; }
+      .identity-text { flex: 1; }
+      .identity-top { display: block; font-size: 9px; white-space: normal; }
+      .identity-top .tiny-divider { display: none; }
+      .identity-top .category-name { display: block; margin-top: 2px; }
+      .identity-text h3 { margin-top: 4px; font-size: 22px; }
+      .card-status { display: none; }
+      .detail-facts { grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 7px 3px; margin-top: 2px; padding-top: 11px; }
+      .fact + .fact { padding-right: 9px; }
+      .fact:nth-child(3) { border-right: 0; padding-right: 0; }
+      .fact-label { font-size: 10px; }
+      .fact-value { font-size: 13px; margin-top: 4px; }
+      .fact-value--mass { font-size: 14px; }
+      .detail-bottom { grid-column: 1 / -1; grid-row: 3; grid-template-columns: 1fr; gap: 8px; margin-top: 1px; padding-top: 9px; }
+      .micro-label { font-size: 9px; margin-bottom: 5px; }
+      .config-value { font-size: 12px; text-align: right; }
+      .shell-top { font-size: 10px; }
+      .shell-track { height: 3px; margin-top: 6px; }
+      .footnote { margin-top: 16px; }
+      .footer { margin-top: 27px; }
+    }
+    @media (max-width: 390px) {
+      .app { padding-right: 17px; padding-left: 17px; }
+      .brand-name { font-size: 15px; }
+      .brand-mark { width: 39px; height: 39px; }
+      .topbar-meta { gap: 5px; font-size: 9px; }
+      .hero-copy p { max-width: 310px; }
+      .detail-panel { grid-template-columns: minmax(0,1fr) 93px; grid-template-rows: 96px auto auto; padding: 12px; }
+      .diagram-side { height: 93px; }
+      .identity-symbol { width: 36px; height: 36px; font-size: 21px; }
+      .identity-text h3 { font-size: 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="backdrop" aria-hidden="true"><div class="backdrop-grid"></div><div class="backdrop-glow"></div><div class="backdrop-glow backdrop-glow--blue"></div></div>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand" aria-label="المنتا، اطلس تعاملی عناصر">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="3" fill="currentColor"/>
+            <ellipse cx="20" cy="20" rx="17" ry="7.5" stroke="currentColor" stroke-width="1.2" transform="rotate(-36 20 20)" opacity=".86"/>
+            <ellipse cx="20" cy="20" rx="17" ry="7.5" stroke="currentColor" stroke-width="1.2" transform="rotate(58 20 20)" opacity=".55"/>
+            <circle cx="7.2" cy="30.9" r="2" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="brand-copy"><span class="brand-name" lang="en">ELEMENTA</span><span class="brand-sub">اطلس تعاملی عناصر</span></div>
+      </div>
+      <div class="topbar-meta"><span><span class="online-dot" aria-hidden="true"></span>جهان در مقیاس اتم</span><span class="separator" aria-hidden="true"></span><span class="topbar-code">۱۱۸ عنصر شناخته‌شده</span></div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <span class="eyebrow">یک اطلس برای کشف ماده</span>
+          <h1 id="hero-title">نقشهٔ پنهانِ <span>جهان.</span></h1>
+          <p>از هیدروژن تا اوگانسون؛ ۱۱۸ عنصر، هر کدام داستانی از ساختار جهان. روی یک عنصر مکث کنید و به درون اتم سفر کنید.</p>
+        </div>
+        <div class="search-area">
+          <div class="search-caption"><label for="element-search">عنصری را پیدا کنید</label><small>نام، نماد یا عدد اتمی</small></div>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+            <input id="element-search" type="search" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="search-results" autocomplete="off" spellcheck="false" placeholder="مثلاً طلا، Au یا ۷۹..." enterkeyhint="search">
+            <kbd aria-hidden="true">/</kbd>
+          </div>
+          <ul id="search-results" class="search-results" role="listbox" aria-label="نتیجه‌های جست‌وجوی عنصر" hidden></ul>
+        </div>
+      </section>
+
+      <nav class="legend" aria-label="فیلتر دسته‌بندی عناصر">
+        <div class="legend-title"><strong>راهنمای رنگ</strong><span>برای فیلتر انتخاب کنید</span></div>
+        <div class="legend-chips" id="legend-chips"></div>
+      </nav>
+
+      <section class="explorer" aria-labelledby="table-title">
+        <div class="explorer-heading">
+          <div><div class="explorer-kicker" aria-hidden="true">ردیف عناصر / ۰۱—۱۱۸</div><h2 id="table-title">جدول تناوبی عناصر</h2></div>
+          <div class="explorer-count" id="element-count" aria-live="polite">نمایش ۱۱۸ عنصر</div>
+        </div>
+        <div class="mobile-panel-slot" id="mobile-panel-slot"></div>
+        <div class="table-frame" id="table-frame">
+          <div class="table-scroll" id="table-scroll" tabindex="0" aria-label="جدول تناوبی؛ برای دیدن همهٔ گروه‌ها به چپ و راست پیمایش کنید">
+            <div class="periodic-grid" id="periodic-grid" role="group" aria-label="جدول تناوبی ۱۱۸ عنصر">
+              <section class="detail-panel" id="detail-panel" aria-label="جزئیات عنصر در حال نمایش">
+                <div class="diagram-side">
+                  <svg class="bohr-svg" id="bohr-svg" viewBox="0 0 200 200" role="img" aria-label="مدل شماتیک اتم"></svg>
+                  <span class="diagram-caption">مدل بور · نمایش شماتیک</span>
+                </div>
+                <div class="detail-content">
+                  <div class="detail-head">
+                    <div class="identity">
+                      <div class="identity-symbol" id="detail-symbol" aria-hidden="true">Au</div>
+                      <div class="identity-text"><div class="identity-top"><span id="detail-number">عنصر ۷۹</span><span class="tiny-divider" aria-hidden="true"></span><span class="category-name" id="detail-category">فلز واسطه</span></div><h3 id="detail-name">طلا</h3></div>
+                    </div>
+                    <span class="card-status"><i aria-hidden="true"></i>در حال مشاهده</span>
+                  </div>
+                  <div class="detail-facts">
+                    <div class="fact"><span class="fact-label">جرم اتمی</span><strong class="fact-value fact-value--mass" id="detail-mass" dir="ltr">196.97 <small>u</small></strong></div>
+                    <div class="fact"><span class="fact-label">حالت در ۲۰ °C</span><strong class="fact-value" id="detail-state"></strong></div>
+                    <div class="fact"><span class="fact-label">دوره / گروه</span><strong class="fact-value" id="detail-location"></strong></div>
+                    <div class="fact"><span class="fact-label">بلوک</span><strong class="fact-value fact-value--latin" id="detail-block" dir="ltr">d</strong></div>
+                  </div>
+                  <div class="detail-bottom">
+                    <div class="config"><span class="micro-label">آرایش الکترونی</span><span class="config-value" id="detail-config" dir="ltr"></span></div>
+                    <div><span class="micro-label">الکترون‌ها در لایه‌های K تا Q</span><div class="shells" id="detail-shells" aria-label="تعداد الکترون‌ها در هر لایه"></div></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+          <div class="scroll-fade scroll-fade--left" aria-hidden="true"></div><div class="scroll-fade scroll-fade--right" aria-hidden="true"></div>
+          <div class="scroll-meter" aria-hidden="true"><span id="scroll-thumb"></span></div>
+        </div>
+        <div class="table-help"><span class="table-help--desktop">برای پیش‌نمایش مکث کنید؛ برای ثابت‌کردن، عنصر را انتخاب کنید. با کلیدهای جهت‌دار میان عنصرها حرکت کنید.</span><span class="table-help--touch">جدول را به چپ و راست بکشید تا همهٔ گروه‌ها را ببینید.</span><span>جست‌وجو: <span class="key">/</span> &nbsp; فیلتر: <span class="key">Esc</span></span></div>
+        <p class="footnote"><span class="footnote-icon" aria-hidden="true">i</span><span>جرم‌های داخل کروشه، عدد جرمیِ ایزوتوپ با بیشترین نیمه‌عمرند. مدارهای اتمی نمایی شماتیک از شمار الکترون‌ها هستند، نه مسیر واقعی آن‌ها.</span></p>
+      </section>
+    </main>
+    <footer class="footer"><span><strong>المنتا</strong> · اطلس کوچک برای جهانی بزرگ</span><span>از کنجکاوی شروع می‌شود.</span></footer>
+  </div>
+  <p class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <script>
+    (() => {
+      'use strict';
+
+      // Symbol | Persian name | rounded standard atomic weight (or isotope mass number) | category | state at ~20 °C.
+      const elementData = `
+H|هیدروژن|1.008|n|g
+He|هلیم|4.0026|g|g
+Li|لیتیم|6.94|a|s
+Be|بریلیم|9.0122|e|s
+B|بور|10.81|m|s
+C|کربن|12.011|n|s
+N|نیتروژن|14.007|n|g
+O|اکسیژن|15.999|n|g
+F|فلوئور|18.998|h|g
+Ne|نئون|20.180|g|g
+Na|سدیم|22.990|a|s
+Mg|منیزیم|24.305|e|s
+Al|آلومینیوم|26.982|p|s
+Si|سیلیسیم|28.085|m|s
+P|فسفر|30.974|n|s
+S|گوگرد|32.06|n|s
+Cl|کلر|35.45|h|g
+Ar|آرگون|39.948|g|g
+K|پتاسیم|39.098|a|s
+Ca|کلسیم|40.078|e|s
+Sc|اسکاندیم|44.956|t|s
+Ti|تیتانیم|47.867|t|s
+V|وانادیم|50.942|t|s
+Cr|کروم|51.996|t|s
+Mn|منگنز|54.938|t|s
+Fe|آهن|55.845|t|s
+Co|کبالت|58.933|t|s
+Ni|نیکل|58.693|t|s
+Cu|مس|63.546|t|s
+Zn|روی|65.38|t|s
+Ga|گالیم|69.723|p|s
+Ge|ژرمانیم|72.630|m|s
+As|آرسنیک|74.922|m|s
+Se|سلنیم|78.971|n|s
+Br|برم|79.904|h|l
+Kr|کریپتون|83.798|g|g
+Rb|روبیدیم|85.468|a|s
+Sr|استرانسیم|87.62|e|s
+Y|ایتریم|88.906|t|s
+Zr|زیرکونیم|91.224|t|s
+Nb|نیوبیم|92.906|t|s
+Mo|مولیبدن|95.95|t|s
+Tc|تکنسیم|[97]|t|s
+Ru|روتنیم|101.07|t|s
+Rh|رودیم|102.91|t|s
+Pd|پالادیم|106.42|t|s
+Ag|نقره|107.87|t|s
+Cd|کادمیم|112.41|t|s
+In|ایندیم|114.82|p|s
+Sn|قلع|118.71|p|s
+Sb|آنتیموان|121.76|m|s
+Te|تلوریم|127.60|m|s
+I|ید|126.90|h|s
+Xe|زنون|131.29|g|g
+Cs|سزیم|132.91|a|s
+Ba|باریم|137.33|e|s
+La|لانتان|138.91|l|s
+Ce|سریم|140.12|l|s
+Pr|پرازئودیمیم|140.91|l|s
+Nd|نئودیمیم|144.24|l|s
+Pm|پرومتیم|[145]|l|s
+Sm|ساماریم|150.36|l|s
+Eu|یوروپیم|151.96|l|s
+Gd|گادولینیم|157.25|l|s
+Tb|تربیم|158.93|l|s
+Dy|دیسپروزیم|162.50|l|s
+Ho|هولمیم|164.93|l|s
+Er|اربیم|167.26|l|s
+Tm|تولیم|168.93|l|s
+Yb|ایتربیم|173.05|l|s
+Lu|لوتتیم|174.97|l|s
+Hf|هافنیم|178.49|t|s
+Ta|تانتال|180.95|t|s
+W|تنگستن|183.84|t|s
+Re|رنیم|186.21|t|s
+Os|اسمیم|190.23|t|s
+Ir|ایریدیم|192.22|t|s
+Pt|پلاتین|195.08|t|s
+Au|طلا|196.97|t|s
+Hg|جیوه|200.59|t|l
+Tl|تالیم|204.38|p|s
+Pb|سرب|207.2|p|s
+Bi|بیسموت|208.98|p|s
+Po|پولونیم|[209]|p|s
+At|استاتین|[210]|h|s
+Rn|رادون|[222]|g|g
+Fr|فرانسیم|[223]|a|s
+Ra|رادیم|[226]|e|s
+Ac|اکتینیم|[227]|f|s
+Th|توریم|232.04|f|s
+Pa|پروتاکتینیم|231.04|f|s
+U|اورانیوم|238.03|f|s
+Np|نپتونیم|[237]|f|s
+Pu|پلوتونیم|[244]|f|s
+Am|آمریسیم|[243]|f|s
+Cm|کوریم|[247]|f|s
+Bk|برکلیم|[247]|f|s
+Cf|کالیفرنیم|[251]|f|s
+Es|اینشتینیم|[252]|f|s
+Fm|فرمیم|[257]|f|s
+Md|مندلیفیم|[258]|f|s
+No|نوبلیم|[259]|f|s
+Lr|لارنسیم|[266]|f|s
+Rf|رادرفوردیم|[267]|t|u
+Db|دوبنیم|[268]|t|u
+Sg|سیبورگیم|[269]|t|u
+Bh|بوریم|[270]|t|u
+Hs|هاسیم|[277]|t|u
+Mt|مایتنریم|[278]|t|u
+Ds|دارمشتاتیم|[281]|t|u
+Rg|رونتگنیم|[282]|t|u
+Cn|کوپرنیسیم|[285]|t|u
+Nh|نیهونیم|[286]|p|u
+Fl|فلروویم|[289]|p|u
+Mc|موسکوویم|[290]|p|u
+Lv|لیورموریم|[293]|p|u
+Ts|تنسین|[294]|h|u
+Og|اوگانسون|[294]|g|u`.trim();
+
+      const categories = {
+        a: { name: 'فلز قلیایی', rgb: '255,107,107' },
+        e: { name: 'فلز قلیایی خاکی', rgb: '255,169,77' },
+        t: { name: 'فلز واسطه', rgb: '255,212,59' },
+        p: { name: 'فلز پس‌واسطه', rgb: '105,219,124' },
+        m: { name: 'شبه‌فلز', rgb: '56,217,169' },
+        n: { name: 'نافلز', rgb: '77,171,247' },
+        h: { name: 'هالوژن', rgb: '116,143,252' },
+        g: { name: 'گاز نجیب', rgb: '218,119,242' },
+        l: { name: 'لانتانید', rgb: '247,131,172' },
+        f: { name: 'اکتینید', rgb: '229,153,247' }
+      };
+      const stateNames = { s: 'جامد', l: 'مایع', g: 'گاز', u: 'نامشخص' };
+      const faDigits = '۰۱۲۳۴۵۶۷۸۹';
+      const fa = value => String(value).replace(/\d/g, digit => faDigits[Number(digit)]);
+
+      function coordinates(number) {
+        if (number === 1) return [1, 1];
+        if (number === 2) return [1, 18];
+        if (number <= 10) return [2, number <= 4 ? number - 2 : number + 8];
+        if (number <= 18) return [3, number <= 12 ? number - 10 : number];
+        if (number <= 36) return [4, number - 18];
+        if (number <= 54) return [5, number - 36];
+        if (number <= 56) return [6, number - 54];
+        if (number <= 71) return [8, number - 54];
+        if (number <= 86) return [6, number - 68];
+        if (number <= 88) return [7, number - 86];
+        if (number <= 103) return [9, number - 86];
+        return [7, number - 100];
+      }
+
+      const elements = elementData.split('\n').map((line, index) => {
+        const [symbol, name, mass, category, state] = line.split('|');
+        const number = index + 1;
+        const [row, column] = coordinates(number);
+        const period = row === 8 ? 6 : row === 9 ? 7 : row;
+        const group = row > 7 ? null : column;
+        const block = row > 7 ? 'f' : number === 2 || column <= 2 ? 's' : column >= 13 ? 'p' : 'd';
+        return { number, symbol, name, mass, category, state, row, column, period, group, block };
+      });
+      const byNumber = new Map(elements.map(element => [element.number, element]));
+      const tileNodes = new Map();
+      const grid = document.getElementById('periodic-grid');
+      const panel = document.getElementById('detail-panel');
+      const mobileSlot = document.getElementById('mobile-panel-slot');
+      const scroll = document.getElementById('table-scroll');
+      const frame = document.getElementById('table-frame');
+      const chips = document.getElementById('legend-chips');
+      const count = document.getElementById('element-count');
+      const announcement = document.getElementById('announcement');
+      const search = document.getElementById('element-search');
+      const results = document.getElementById('search-results');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const smallLayout = window.matchMedia('(max-width: 1199px)');
+      let pinned = byNumber.get(79);
+      let shown = null;
+      let selectedFilter = null;
+      let hoveredFilter = null;
+      let suggestions = [];
+      let suggestionIndex = -1;
+      let orbitGroups = [];
+      let orbitAngles = [];
+      let frameId = 0;
+      let previousFrame = 0;
+
+      // Aufbau / Madelung filling, followed by the twenty observed ground-state exceptions.
+      const orbitals = [];
+      const orbitalLetters = ['s', 'p', 'd', 'f'];
+      for (let n = 1; n <= 7; n++) {
+        for (let l = 0; l < 4 && l < n; l++) {
+          orbitals.push({ n, l, key: `${n}${orbitalLetters[l]}`, capacity: 4 * l + 2 });
+        }
+      }
+      orbitals.sort((a, b) => (a.n + a.l - b.n - b.l) || (a.n - b.n));
+      const exceptions = {
+        24: { '3d': 5, '4s': 1 }, 29: { '3d': 10, '4s': 1 },
+        41: { '4d': 4, '5s': 1 }, 42: { '4d': 5, '5s': 1 },
+        44: { '4d': 7, '5s': 1 }, 45: { '4d': 8, '5s': 1 },
+        46: { '4d': 10, '5s': 0 }, 47: { '4d': 10, '5s': 1 },
+        57: { '4f': 0, '5d': 1 }, 58: { '4f': 1, '5d': 1 },
+        64: { '4f': 7, '5d': 1 }, 78: { '5d': 9, '6s': 1 },
+        79: { '5d': 10, '6s': 1 }, 89: { '5f': 0, '6d': 1 },
+        90: { '5f': 0, '6d': 2 }, 91: { '5f': 2, '6d': 1 },
+        92: { '5f': 3, '6d': 1 }, 93: { '5f': 4, '6d': 1 },
+        96: { '5f': 7, '6d': 1 }, 103: { '6d': 0, '7p': 1 }
+      };
+      const configurationCache = new Map();
+      function electronData(number) {
+        if (configurationCache.has(number)) return configurationCache.get(number);
+        const occupied = new Map();
+        let remaining = number;
+        for (const orbital of orbitals) {
+          if (remaining <= 0) break;
+          const amount = Math.min(remaining, orbital.capacity);
+          occupied.set(orbital.key, amount);
+          remaining -= amount;
+        }
+        if (exceptions[number]) {
+          for (const [key, amount] of Object.entries(exceptions[number])) occupied.set(key, amount);
+        }
+        const shells = Array(7).fill(0);
+        for (const [key, amount] of occupied) shells[Number(key[0]) - 1] += amount;
+        const coreNumber = [86, 54, 36, 18, 10, 2].find(core => core < number) || 0;
+        const core = coreNumber ? electronData(coreNumber).occupied : new Map();
+        const ordered = [...occupied.entries()]
+          .filter(([key, amount]) => amount - (core.get(key) || 0) > 0)
+          .sort((a, b) => Number(a[0][0]) - Number(b[0][0]) || orbitalLetters.indexOf(a[0][1]) - orbitalLetters.indexOf(b[0][1]));
+        const prefix = coreNumber ? `<span>[${byNumber.get(coreNumber).symbol}]</span> ` : '';
+        const configuration = prefix + ordered.map(([key, amount]) => `${key}<sup>${amount - (core.get(key) || 0)}</sup>`).join(' ');
+        const result = { occupied, shells, configuration };
+        configurationCache.set(number, result);
+        return result;
+      }
+
+      const groupLabels = Array.from({ length: 18 }, (_, index) => `<span class="axis-label axis-label--group" data-group="${index + 1}" style="grid-column:${index + 2};grid-row:1" aria-label="گروه ${fa(index + 1)}">${String(index + 1).padStart(2, '0')}</span>`).join('');
+      const periodLabels = Array.from({ length: 7 }, (_, index) => `<span class="axis-label axis-label--period" data-period="${index + 1}" style="grid-column:1;grid-row:${index + 2}" aria-label="دوره ${fa(index + 1)}">${String(index + 1).padStart(2, '0')}</span>`).join('');
+      const seriesLabels = `<span class="axis-label axis-label--series" data-series="l" style="grid-column:1;grid-row:10" aria-label="ردیف لانتانیدها">Ln</span><span class="axis-label axis-label--series" data-series="f" style="grid-column:1;grid-row:11" aria-label="ردیف اکتینیدها">An</span>`;
+      const placeholders = `<button type="button" class="placeholder" data-filter="l" style="--rgb:${categories.l.rgb};grid-column:4;grid-row:7" aria-label="نمایش لانتانیدها، عنصرهای ۵۷ تا ۷۱" aria-pressed="false"><strong>57–71</strong><small>لانتانیدها</small></button><button type="button" class="placeholder" data-filter="f" style="--rgb:${categories.f.rgb};grid-column:4;grid-row:8" aria-label="نمایش اکتینیدها، عنصرهای ۸۹ تا ۱۰۳" aria-pressed="false"><strong>89–103</strong><small>اکتینیدها</small></button>`;
+      const tiles = elements.map(element => {
+        const gridRow = element.row > 7 ? element.row + 2 : element.row + 1;
+        const delay = Math.min(430, (element.row + element.column) * 15);
+        return `<button type="button" class="element-tile${element.number === 79 ? ' is-pinned' : ''}" data-number="${element.number}" tabindex="${element.number === 79 ? 0 : -1}" style="--rgb:${categories[element.category].rgb};--enter-delay:${delay}ms;grid-column:${element.column + 1};grid-row:${gridRow}" aria-label="${element.name}، ${element.symbol}، عدد اتمی ${fa(element.number)}، ${categories[element.category].name}"><span class="tile-number" aria-hidden="true">${String(element.number).padStart(2, '0')}</span><span class="tile-symbol" aria-hidden="true">${element.symbol}</span><span class="tile-name" aria-hidden="true">${element.name}</span><span class="tile-mass" aria-hidden="true">${element.mass}</span></button>`;
+      }).join('');
+      grid.insertAdjacentHTML('afterbegin', `<span class="axis-label axis-label--corner" style="grid-column:1;grid-row:1" aria-hidden="true">↗</span>${groupLabels}${periodLabels}${seriesLabels}<div class="f-divider" style="grid-column:2 / -1;grid-row:9" aria-label="بلوک اف، لانتانیدها و اکتینیدها"><b>f</b><span>عناصر درونی</span></div>${placeholders}${tiles}`);
+      grid.querySelectorAll('.element-tile').forEach(tile => tileNodes.set(Number(tile.dataset.number), tile));
+
+      chips.innerHTML = `<button type="button" class="legend-chip legend-chip--all is-active" data-category="all" aria-pressed="true"><span class="legend-chip__dot" aria-hidden="true"></span>همهٔ عناصر</button>` + Object.entries(categories).map(([key, category]) => `<button type="button" class="legend-chip" data-category="${key}" aria-pressed="false" style="--rgb:${category.rgb}"><span class="legend-chip__dot" aria-hidden="true"></span>${category.name}</button>`).join('');
+
+      function relocatePanel() {
+        const target = smallLayout.matches ? mobileSlot : grid;
+        if (panel.parentNode !== target) target.appendChild(panel);
+        updateScrollEdges();
+      }
+      if (smallLayout.addEventListener) smallLayout.addEventListener('change', relocatePanel);
+      else smallLayout.addListener(relocatePanel);
+      relocatePanel();
+
+      function stateIcon(state) {
+        const paths = {
+          s: '<path d="M7 1.8 12.4 4.8v6.3L7 14.2 1.6 11.1V4.8L7 1.8Z"/><path d="M1.8 4.9 7 8l5.2-3.1M7 8v6"/>',
+          l: '<path d="M7 1.4C5.4 3.7 2.5 7 2.5 9.4a4.5 4.5 0 0 0 9 0C11.5 7 8.6 3.7 7 1.4Z"/><path d="M4.8 10.5c.5.8 1.2 1.2 2.2 1.2"/>',
+          g: '<circle cx="3.2" cy="10.8" r="1.3"/><circle cx="10.8" cy="4.1" r="1.4"/><circle cx="10.4" cy="11.5" r="1"/><path d="m4.4 9.8 5.2-4.7M4.5 11l4.8.5"/>',
+          u: '<path d="M5.1 5.2a2.1 2.1 0 1 1 3.8 1.3c-.7 1-1.9 1.2-1.9 2.8"/><path d="M7 11.9v.3"/><circle cx="7" cy="7" r="6"/>'
+        };
+        return `<span class="state-icon" aria-hidden="true"><svg viewBox="0 0 14 14">${paths[state]}</svg></span>`;
+      }
+
+      function renderAtom(element, shellCounts) {
+        const radii = [18, 29, 40, 51, 62, 73, 84];
+        const ghosts = radii.map(radius => `<circle class="ghost-orbit" cx="100" cy="100" r="${radius}"/>`).join('');
+        const rings = shellCounts.map((amount, index) => {
+          if (!amount) return '';
+          const radius = radii[index];
+          const electrons = Array.from({ length: amount }, (_, i) => {
+            const angle = 2 * Math.PI * (i / amount + (index % 2 ? .5 / amount : 0)) - Math.PI / 2;
+            const x = (100 + Math.cos(angle) * radius).toFixed(2);
+            const y = (100 + Math.sin(angle) * radius).toFixed(2);
+            return `<circle class="electron-halo" cx="${x}" cy="${y}" r="3.7"/><circle class="electron-dot" cx="${x}" cy="${y}" r="1.65"/>`;
+          }).join('');
+          return `<g class="orbit-shell" style="--shell-delay:${index * 78}ms"><circle class="orbit-line" cx="100" cy="100" r="${radius}"/><g class="electron-ring" data-ring="${index}">${electrons}</g></g>`;
+        }).join('');
+        const nucleons = Array.from({ length: 18 }, (_, i) => {
+          const distance = Math.sqrt((i + .45) / 18) * 9;
+          const angle = i * 2.399963229728653;
+          return `<circle class="nucleon" cx="${(100 + Math.cos(angle) * distance).toFixed(2)}" cy="${(100 + Math.sin(angle) * distance).toFixed(2)}" r="${i % 4 === 0 ? 1.9 : 1.55}"/>`;
+        }).join('');
+        const svg = document.getElementById('bohr-svg');
+        svg.setAttribute('aria-label', `مدل شماتیک بورِ ${element.name}؛ ${fa(shellCounts.filter(Boolean).length)} لایه و ${fa(element.number)} الکترون`);
+        svg.innerHTML = `${ghosts}${rings}<circle class="nucleus-halo" cx="100" cy="100" r="13"/><g>${nucleons}</g>`;
+        orbitGroups = [...svg.querySelectorAll('.electron-ring')];
+        orbitAngles = Array(7).fill(0);
+        startOrbitAnimation();
+      }
+
+      function animationFrame(time) {
+        if (document.hidden || reducedMotion.matches) { frameId = 0; previousFrame = 0; return; }
+        const delta = previousFrame ? Math.min(50, time - previousFrame) : 0;
+        previousFrame = time;
+        for (const ring of orbitGroups) {
+          const index = Number(ring.dataset.ring);
+          const direction = index % 2 ? -1 : 1;
+          orbitAngles[index] = (orbitAngles[index] + direction * delta * (23 / (1 + index * .51)) / 1000) % 360;
+          ring.setAttribute('transform', `rotate(${orbitAngles[index].toFixed(2)} 100 100)`);
+        }
+        frameId = requestAnimationFrame(animationFrame);
+      }
+      function startOrbitAnimation() {
+        if (!frameId && !document.hidden && !reducedMotion.matches) frameId = requestAnimationFrame(animationFrame);
+      }
+      function stopOrbitAnimation() {
+        if (frameId) cancelAnimationFrame(frameId);
+        frameId = 0;
+        previousFrame = 0;
+      }
+      document.addEventListener('visibilitychange', () => {
+        document.body.classList.toggle('is-hidden', document.hidden);
+        if (document.hidden) stopOrbitAnimation();
+        else startOrbitAnimation();
+      });
+      const motionChange = () => { if (reducedMotion.matches) stopOrbitAnimation(); else startOrbitAnimation(); };
+      if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', motionChange);
+      else reducedMotion.addListener(motionChange);
+
+      function showElement(element) {
+        if (shown && shown.number === element.number) return;
+        if (shown) tileNodes.get(shown.number).classList.remove('is-preview');
+        shown = element;
+        tileNodes.get(element.number).classList.add('is-preview');
+        document.documentElement.style.setProperty('--accent-rgb', categories[element.category].rgb);
+        document.getElementById('detail-symbol').textContent = element.symbol;
+        document.getElementById('detail-number').textContent = `عنصر ${fa(element.number)}`;
+        document.getElementById('detail-category').textContent = categories[element.category].name;
+        document.getElementById('detail-name').textContent = element.name;
+        document.getElementById('detail-mass').innerHTML = `${element.mass}${element.mass.startsWith('[') ? '' : ' <small>u</small>'}`;
+        document.getElementById('detail-state').innerHTML = `${stateIcon(element.state)}${stateNames[element.state]}`;
+        document.getElementById('detail-location').textContent = `${fa(element.period)} / ${element.group ? fa(element.group) : '—'}`;
+        document.getElementById('detail-block').textContent = element.block;
+        const electrons = electronData(element.number);
+        document.getElementById('detail-config').innerHTML = electrons.configuration;
+        const capacities = [2, 8, 18, 32, 32, 18, 8];
+        document.getElementById('detail-shells').innerHTML = electrons.shells.map((amount, i) => `<div class="shell"><div class="shell-top"><span>${'KLMNOPQ'[i]}</span><strong>${amount || '–'}</strong></div><span class="shell-track"><span class="shell-fill" style="--fill:${(amount / capacities[i]) * 100}%;--bar-delay:${i * 70}ms"></span></span></div>`).join('');
+        renderAtom(element, electrons.shells);
+        grid.querySelectorAll('.axis-label.is-lit').forEach(label => label.classList.remove('is-lit'));
+        grid.querySelector(`[data-group="${element.group || 3}"]`)?.classList.add('is-lit');
+        grid.querySelector(`[data-period="${element.period}"]`)?.classList.add('is-lit');
+        if (element.row > 7) grid.querySelector(`[data-series="${element.category}"]`)?.classList.add('is-lit');
+      }
+
+      function pin(element, speak = true) {
+        if (pinned && pinned.number !== element.number) tileNodes.get(pinned.number).classList.remove('is-pinned');
+        pinned = element;
+        tileNodes.get(element.number).classList.add('is-pinned');
+        showElement(element);
+        if (speak) announcement.textContent = `${element.name}، عنصر ${fa(element.number)}، ${categories[element.category].name}، ${stateNames[element.state]}؛ جرم اتمی ${fa(element.mass)}.`;
+      }
+
+      function setRoving(element) {
+        grid.querySelector('.element-tile[tabindex="0"]')?.setAttribute('tabindex', '-1');
+        tileNodes.get(element.number).setAttribute('tabindex', '0');
+      }
+      function keepTileInView(tile, center = false) {
+        const left = tile.offsetLeft;
+        const right = left + tile.offsetWidth;
+        const visibleStart = scroll.scrollLeft;
+        const visibleEnd = visibleStart + scroll.clientWidth;
+        let desired = visibleStart;
+        if (center) desired = left + tile.offsetWidth / 2 - scroll.clientWidth / 2;
+        else if (left < visibleStart + 18) desired = left - 23;
+        else if (right > visibleEnd - 18) desired = right - scroll.clientWidth + 23;
+        const max = scroll.scrollWidth - scroll.clientWidth;
+        scroll.scrollTo({ left: Math.max(0, Math.min(max, desired)), behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+        const rect = tile.getBoundingClientRect();
+        if (rect.top < 64 || rect.bottom > window.innerHeight - 28) {
+          window.scrollBy({ top: rect.top - window.innerHeight * .44, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+        }
+      }
+      function flashTile(tile) {
+        tile.classList.remove('is-flashing');
+        void tile.offsetWidth;
+        tile.classList.add('is-flashing');
+        window.setTimeout(() => tile.classList.remove('is-flashing'), 1450);
+      }
+      function goToElement(element) {
+        const tile = tileNodes.get(element.number);
+        setRoving(element);
+        tile.focus({ preventScroll: true });
+        pin(element);
+        keepTileInView(tile, true);
+        flashTile(tile);
+        closeSearch();
+        search.value = '';
+      }
+      showElement(pinned);
+
+      grid.addEventListener('pointerover', event => {
+        if (event.pointerType !== 'mouse') return;
+        const tile = event.target.closest('.element-tile');
+        if (tile && grid.contains(tile)) showElement(byNumber.get(Number(tile.dataset.number)));
+      });
+      grid.addEventListener('pointerleave', event => {
+        if (event.pointerType === 'mouse') showElement(pinned);
+      });
+      grid.addEventListener('focusin', event => {
+        const tile = event.target.closest('.element-tile');
+        if (!tile) return;
+        const element = byNumber.get(Number(tile.dataset.number));
+        setRoving(element);
+        pin(element);
+      });
+      grid.addEventListener('click', event => {
+        const placeholder = event.target.closest('.placeholder');
+        if (placeholder) { toggleFilter(placeholder.dataset.filter); return; }
+        const tile = event.target.closest('.element-tile');
+        if (tile) pin(byNumber.get(Number(tile.dataset.number)));
+      });
+      grid.addEventListener('keydown', event => {
+        const tile = event.target.closest('.element-tile');
+        if (!tile) return;
+        const element = byNumber.get(Number(tile.dataset.number));
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); pin(element); return; }
+        let destination;
+        if (event.key === 'Home' || event.key === 'End') {
+          event.preventDefault();
+          const row = elements.filter(candidate => candidate.row === element.row).sort((a, b) => a.column - b.column);
+          destination = event.key === 'Home' ? row[0] : row[row.length - 1];
+        } else if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(event.key)) {
+          event.preventDefault();
+          const horizontal = event.key === 'ArrowRight' || event.key === 'ArrowLeft';
+          const sign = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1;
+          const candidates = elements.filter(candidate => horizontal
+            ? candidate.row === element.row && (candidate.column - element.column) * sign > 0
+            : (candidate.row - element.row) * sign > 0);
+          candidates.sort((a, b) => horizontal
+            ? Math.abs(a.column - element.column) - Math.abs(b.column - element.column)
+            : Math.abs(a.row - element.row) - Math.abs(b.row - element.row) || Math.abs(a.column - element.column) - Math.abs(b.column - element.column));
+          destination = candidates[0];
+        }
+        if (destination) {
+          const nextTile = tileNodes.get(destination.number);
+          setRoving(destination);
+          nextTile.focus({ preventScroll: true });
+          if (pinned.number !== destination.number) pin(destination);
+          keepTileInView(nextTile);
+        }
+      });
+
+      function applyFilter() {
+        const effective = hoveredFilter || selectedFilter;
+        for (const element of elements) {
+          const tile = tileNodes.get(element.number);
+          tile.classList.toggle('is-dimmed', !!effective && element.category !== effective);
+          tile.classList.toggle('is-matched', !!effective && element.category === effective);
+        }
+        grid.querySelectorAll('.placeholder').forEach(item => {
+          item.classList.toggle('is-dimmed', !!effective && item.dataset.filter !== effective);
+          item.classList.toggle('is-matched', !!effective && item.dataset.filter === effective);
+          item.setAttribute('aria-pressed', String(selectedFilter === item.dataset.filter));
+        });
+        chips.querySelectorAll('.legend-chip').forEach(chip => {
+          const active = chip.dataset.category === (selectedFilter || 'all');
+          chip.classList.toggle('is-active', active);
+          chip.setAttribute('aria-pressed', String(active));
+        });
+        const matching = selectedFilter ? elements.filter(element => element.category === selectedFilter).length : elements.length;
+        count.textContent = selectedFilter ? `نمایش ${fa(matching)} عنصر از ${fa(elements.length)}` : `نمایش ${fa(elements.length)} عنصر`;
+      }
+      function toggleFilter(category) {
+        hoveredFilter = null;
+        selectedFilter = selectedFilter === category || category === 'all' ? null : category;
+        applyFilter();
+        announcement.textContent = selectedFilter ? `فیلتر ${categories[selectedFilter].name}؛ ${fa(elements.filter(element => element.category === selectedFilter).length)} عنصر نمایش داده می‌شود.` : 'فیلتر برداشته شد؛ همهٔ ۱۱۸ عنصر نمایش داده می‌شوند.';
+      }
+      chips.addEventListener('click', event => {
+        const chip = event.target.closest('.legend-chip');
+        if (chip) toggleFilter(chip.dataset.category);
+      });
+      chips.addEventListener('pointerover', event => {
+        if (event.pointerType !== 'mouse') return;
+        const chip = event.target.closest('.legend-chip');
+        if (!chip) return;
+        hoveredFilter = chip.dataset.category === 'all' ? null : chip.dataset.category;
+        applyFilter();
+      });
+      chips.addEventListener('pointerleave', event => {
+        if (event.pointerType === 'mouse') { hoveredFilter = null; applyFilter(); }
+      });
+      applyFilter();
+
+      function normalise(value) {
+        return value.trim().toLowerCase()
+          .replace(/[۰-۹]/g, digit => String(faDigits.indexOf(digit)))
+          .replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+          .replace(/[يى]/g, 'ی').replace(/ك/g, 'ک')
+          .replace(/[\u064b-\u065f\u200c\s]/g, '');
+      }
+      function findMatches(query) {
+        const term = normalise(query);
+        if (!term) return [];
+        return elements.map(element => {
+          const values = [String(element.number), element.symbol.toLowerCase(), normalise(element.name)];
+          const rank = values.some(value => value === term) ? 0 : values.some(value => value.startsWith(term)) ? 1 : values.some(value => value.includes(term)) ? 2 : 3;
+          return { element, rank };
+        }).filter(item => item.rank < 3).sort((a, b) => a.rank - b.rank || a.element.number - b.element.number).slice(0, 7).map(item => item.element);
+      }
+      function setActiveSuggestion(index) {
+        suggestionIndex = index;
+        results.querySelectorAll('[role="option"]').forEach((option, i) => option.setAttribute('aria-selected', String(i === index)));
+        if (index >= 0 && suggestions[index]) {
+          search.setAttribute('aria-activedescendant', `search-option-${suggestions[index].number}`);
+          results.children[index]?.scrollIntoView({ block: 'nearest' });
+        } else search.removeAttribute('aria-activedescendant');
+      }
+      function closeSearch() {
+        results.hidden = true;
+        search.setAttribute('aria-expanded', 'false');
+        search.removeAttribute('aria-activedescendant');
+        suggestionIndex = -1;
+      }
+      function updateSearch() {
+        const query = search.value.trim();
+        if (!query) { closeSearch(); return; }
+        suggestions = findMatches(query);
+        results.innerHTML = suggestions.length ? suggestions.map(element => `<li class="search-option" id="search-option-${element.number}" role="option" aria-selected="false" data-number="${element.number}" style="--result-rgb:${categories[element.category].rgb}"><span class="search-option__symbol" aria-hidden="true">${element.symbol}</span><span class="search-option__name">${element.name}<small>${categories[element.category].name}</small></span><span class="search-option__number" aria-hidden="true">${String(element.number).padStart(2, '0')}</span></li>`).join('') : '<li class="search-empty" role="presentation">عنصری با این مشخصات پیدا نشد.</li>';
+        results.hidden = false;
+        search.setAttribute('aria-expanded', 'true');
+        setActiveSuggestion(-1);
+      }
+      search.addEventListener('input', updateSearch);
+      search.addEventListener('focus', () => { if (search.value.trim()) updateSearch(); });
+      search.addEventListener('blur', () => window.setTimeout(closeSearch, 140));
+      search.addEventListener('keydown', event => {
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          if (!search.value.trim()) return;
+          event.preventDefault();
+          if (results.hidden) updateSearch();
+          if (suggestions.length) setActiveSuggestion((suggestionIndex + (event.key === 'ArrowDown' ? 1 : -1) + suggestions.length) % suggestions.length);
+        } else if (event.key === 'Enter' && suggestions.length && !results.hidden) {
+          event.preventDefault();
+          goToElement(suggestions[suggestionIndex < 0 ? 0 : suggestionIndex]);
+        } else if (event.key === 'Escape') {
+          event.preventDefault(); closeSearch();
+          if (selectedFilter) toggleFilter('all');
+        }
+      });
+      results.addEventListener('pointerdown', event => {
+        const option = event.target.closest('[role="option"]');
+        if (!option) return;
+        event.preventDefault();
+        goToElement(byNumber.get(Number(option.dataset.number)));
+      });
+      document.addEventListener('keydown', event => {
+        const editable = event.target.matches('input,textarea,[contenteditable="true"]');
+        if (event.key === '/' && !editable && !event.ctrlKey && !event.metaKey && !event.altKey) {
+          event.preventDefault(); search.focus();
+        } else if (event.key === 'Escape' && !editable && selectedFilter) {
+          toggleFilter('all');
+        }
+      });
+
+      function updateScrollEdges() {
+        const max = Math.max(0, scroll.scrollWidth - scroll.clientWidth);
+        frame.classList.toggle('can-scroll-left', scroll.scrollLeft > 5);
+        frame.classList.toggle('can-scroll-right', scroll.scrollLeft < max - 5);
+        const thumb = document.getElementById('scroll-thumb');
+        const proportion = max ? Math.max(.12, scroll.clientWidth / scroll.scrollWidth) : 1;
+        thumb.style.width = `${proportion * 100}%`;
+        thumb.style.transform = `translateX(${max ? (scroll.scrollLeft / max) * (scroll.clientWidth - proportion * scroll.clientWidth) : 0}px)`;
+      }
+      scroll.addEventListener('scroll', updateScrollEdges, { passive: true });
+      window.addEventListener('resize', updateScrollEdges);
+      updateScrollEdges();
+    })();
+  </script>
+</body>
 </html>
